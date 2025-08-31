@@ -1,0 +1,146 @@
+Develop a secure and user-friendly web application for managing forestry data, trading timber, and monitoring illegal logging activities. The system will integrate database management, real-time reporting, and e-commerce functionality while providing an optimized user experience.
+
+Objectives
+Assess the growth characteristics of avenue trees in the University of Ibadan.
+Develop a secure web-based platform for timber trading across forest reserves.
+Provide a real-time illegal logging reporting dashboard to curb illegal practices.
+Technology Stack
+Backend: PHP (Procedural), MySQL (MySQLi Procedural).
+
+Frontend: HTML, CSS, Bootstrap 5, JavaScript (optional for interactivity).
+
+Development Tools: XAMPP (or any local server setup).
+
+Database Config:
+
+DB_HOST = localhost
+DB_USER = root
+DB_PASSWORD =
+DB_NAME = reserve
+Database Design
+The MySQL database should include, at minimum, the following tables and relationships:
+
+Users: (id, name, email, password, role [admin/forest manager/customer], created_at).
+Forest_Reserves: (id, reserve_name, location, description, created_at).
+Trees: (id, reserve_id, species, coordinates(lat, long), MTH(m), THT(m), DBH(m), basal_area (m2), volume(m3), price, status (available or not, use the right word), created_at) (note: pick the available data from the plot data below, add the ones that are not here to the structure)
+Transactions: (id, tree_id, user_id, reserve_id, payment_code, amount, status [failed/completed], created_at).
+Illegal_Reports: (id, reporter_name, description, coordinates, reserve_id, date_reported, status).
+Logs: activity tracking (id, user_id, action, description, timestamp)
+Add indexes for optimization (e.g., on reserve_id, tree_id, user_id).
+and every other data needed to be added
+
+Sample Database data (For Idanre Forest Reserve)
+coordinates data are not available now, to be updated later.
+For the data below, the species are Tectona Grandis
+MHT (m),THT (m),DBH (m),Basel Area (m2 ),Volume (m3 ) 
+13,17,0.27,0.05726295,0.602173857
+17,24,0.159,0.019858226,0.288385328
+19,27,0.222,0.038712582,0.642603411
+21,31,0.27,0.05726295,0.990351069
+25,33.5,0.254,0.050677318,1.190263699
+19,29,0.143,0.01606269,0.299857948
+12,18.5,0.175,0.024055938,0.291431824
+18,26.5,0.206,0.033333478,0.431219077
+18,24.5,0.206,0.033333478,0.270520243
+20,26.5,0.245,0.047149638,0.738643419
+16,18.6,0.159,0.019858226,0.231186082
+19,21.5,0.2,0.03142,0.326340099
+11.5,13.5,0.14,0.0153958,0.083739995
+18.5,23.5,0.184,0.026593888,0.2823773
+14,18.5,0.127,0.01266933,0.113543829
+20.5,23.5,0.152,0.018148192,0.179780789
+22,28.5,0.229,0.041192406,0.498866337
+10,12.7,0.159,0.019858226,0.082648255
+23,30.5,0.232,0.042278752,0.523940021
+21,27.2,0.248,0.048311392,0.730546839
+23,28.5,0.248,0.048311392,0.793539396
+22,28.5,0.248,0.048311392,0.789763498
+21.5,29.5,0.28,0.0615832,0.839607858
+9,13.5,0.143,0.01606269,0.143830745
+12,18.5,0.172,0.023238232,0.22853841
+14,21,0.261,0.053509046,0.508072397
+16,20,0.238,0.044493862,0.462107032
+14,19.6,0.203,0.03236967,0.318939393
+22,27.8,0.257,0.05188149,0.632473053
+13,17.6,0.159,0.019858226,0.196655476
+12,17,0.175,0.024055938,0.224162979
+10.5,15.5,0.143,0.01606269,0.192021955
+8,11.5,0.095,0.007089138,0.064059292
+24.5,31.5,0.271,0.057687906,1.25347655
+11,14,0.152,0.018148192,0.160072332
+15,19,0.149,0.017438886,0.233919151
+14,18.5,0.159,0.019858226,0.240122637
+12,16.5,0.127,0.01266933,0.146415433
+13,15,0.127,0.01266933,0.168293375
+12,17.8,0.184,0.026593888,0.366141685
+16,21.3,0.181,0.025733766,0.455354978
+14,17.4,0.159,0.019858226,0.215560131
+11,15.1,0.143,0.01606269,0.163089438
+7,13.2,0.127,0.01266933,0.113897343
+
+
+
+Frontend Design
+The website should very beautiful, very important!
+Use Bootstrap 5 for responsive, modern styling.
+Prioritize simplicity, speed, and clean UI/UX.
+Homepage: Full-width banner slider with action buttons (no breadcrumbs).
+Other Pages: Page banner with breadcrumb navigation for clarity.
+Use placeholder images for trees, reserves, and banners (replaceable later).
+Ensure mobile-friendly layout, intuitive navigation, and accessibility compliance (WCAG basics).
+
+
+
+Key Features
+1. Timber Trading System
+Browse and purchase trees, to view individual tree page, to browse by forest reserve.
+Trees displayed with details: coordinates, species, MHT (m), THT (m), DBH (m), basal area, volume, and a calculated sample price.
+Payment System : Paystack Naira  (I will give you sample code of another project in the txt file to copy from. Just learn the paystack payment system.) , payment can only be completed or failed (no pending)
+Secure checkout with payment verification code.
+Email notification sent to the forest manager upon successful payment. (forest manager email - meetmarvelous@gmail.com, can be edited, added, deleted from the admin dashboard)
+2. Illegal Logging Report Dashboard
+Real-time reporting form for users to submit illegal logging incidents (with description + coordinates).
+Email alerts automatically sent to the forest manager.
+Reports stored in the database for record-keeping and admin review.
+
+
+User Dashboard.
+Basic details edit
+To show initial trasactions, complete or failed (no pending), and to be able to print simple customised receipt with payment verification code.
+and anything else necessary
+
+
+3. Admin Dashboard
+Manage all data across reserves:
+
+CRUD operations for trees, species, and reserves.
+Bulk operations (multi-select edit/delete for trees).
+Track total number of trees (available vs. sold) by reserve.
+Manage reserves: add/edit/delete with details.
+manage forest manager name and email
+Transaction history: amounts paid, status, and per-reserve totals.
+Illegal logging reports with status management.
+Trees displayed in tabular format, categorized under their respective reserves.
+and every other things needed to be added
+view transactions details and generate a customised receipt with payment verification code for the user
+
+Security & Validation and others
+Secure login & session management (basic authentication).
+Input validation & SQL injection prevention.
+Use free PHP mail service (e.g., PHPMailer with SMTP) for notifications.
+Activity logging for accountability (who added/edited/deleted data).
+
+Important notes :
+Quest is allowed, Signup/Login isnt necessary until the person wants to trade timber.
+Temporary calculated prices will be auto-generated; actual formulas can be updated later.
+The application should remain modular for easy scaling (adding more reserves, or GIS integration)
+Only when the payment is completed, should the tree becomes unavailable. and all necessary payment data and the user paying should be saved.
+Avoid unnecessary errors , I want a debug free application (so take your time to thimnk well).
+Handle the session and page inclusion (like config.php, auth.php) for all pages properly to avoid the error of not including a necessary file in a web page.
+Create other necessary files I didnt mention
+make the pages files be in the root of the websites (like about.php, contact.php and the likes)
+folder should be where necesaary like admin/ , assets/ etc
+
+
+Give me the file structure first, 
+give me the file codes batch by batch

@@ -1,0 +1,82 @@
+Instead of a static page.
+I want forest reserve in the navbar and other quick link to lead to a reserve_list.php page where it will list all the available reserves.
+And whenever a reserve is clicked (e.g idanre) , it leads to a more dynamic reserve.php?id=1 instead of reserve/idanre.php, so it fetches tree data by reserve_id in the trees table.
+
+
+on reserve.php, show latitude and longitude data for each tree between volume and price
+
+
+Reporting illegal logging from reserve.php. this error was displayed on /user/report.php
+
+Fatal error: Uncaught mysqli_sql_exception: Unknown column 'coordinates' in 'field list' in C:\xampp\htdocs\Forest\user\report.php:42 Stack trace: #0 C:\xampp\htdocs\Forest\user\report.php(42): mysqli->prepare('INSERT INTO ill...') #1 {main} thrown in C:\xampp\htdocs\Forest\user\report.php on line 42
+
+
+When Im on the Report Illegal Activity, http://localhost/Forest/user/report.php . When I clicked the forest reserve in the navbar.It takes me to http://localhost/Forest/user/reserve_list.php instead of http://localhost/Forest/reserve_list.php
+also,
+Whenever I want to login to admin dashboard from
+http://localhost/Forest/login.php, it takes me to http://localhost/Forest//Forest/admin/ instead of http://localhost/Forest/admin/
+
+and so on, it also moved from http://localhost/Forest/user/profile.php to http://localhost/Forest/user/user/transactions.php
+
+And many redirection errors like that on the website. Lets fix all together smartly.
+
+Note 
+define('BASE_URL', 'http://localhost/Forest/');
+
+
+
+http://localhost/Forest/Forest/admin/ for admin login
+fix all possible redirection issues with admin and payment folder
+
+Also, it takes me to 
+http://localhost/Forest/admin/logout.php for admin logout and it doesnt exist, 
+
+
+
+Whenever I click action button on all admin page , the popin form keeps blinking and it displays two scroll bar on the right which shows its properly designed, very frustating and I cant edit anything, hence I cant eve perform crud operations. I guess its an issue with the styling or whatever it is. Pls lets fix. 
+
+also the background color and color of text on some design like the one below to clash hence not easily readable
+like 
+
+admin/index.php :
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+                <div class="card-body">
+                    <i class="fas fa-leaf fa-3x mb-3"></i>
+                    <h3><?php echo $total_reserves; ?></h3>
+                    <p>Forest Reserves</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #8bc34a, #558b2f);">
+                <div class="card-body">
+                    <i class="fas fa-tree fa-3x mb-3"></i>
+                    <h3><?php echo $available_trees; ?></h3>
+                    <p>Available Trees</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #f44336, #b71c1c);">
+                <div class="card-body">
+                    <i class="fas fa-tree fa-3x mb-3"></i>
+                    <h3><?php echo $sold_trees; ?></h3>
+                    <p>Sold Trees</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #2196f3, #0d47a1);">
+                <div class="card-body">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h3><?php echo $pending_reports; ?></h3>
+                    <p>Pending Reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+For example on the,  still have the two scrollbar on the right one for the 

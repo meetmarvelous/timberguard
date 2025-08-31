@@ -1,0 +1,55 @@
+/reserve-management-system/
+│
+├── assets/
+│   ├── css/
+│   │   ├── style.css
+│   │   └── bootstrap.min.css
+│   ├── js/
+│   │   ├── main.js
+│   │   └── bootstrap.bundle.min.js
+│   └── img/
+│       ├── logo.png
+│       └── placeholder/
+│           ├── tree.jpg
+│           └── forest.jpg
+│
+├── includes/
+│   ├── config.php
+│   ├── auth.php
+│   ├── db.php
+│   ├── functions.php
+│   ├── header.php
+│   ├── footer.php
+│   └── navigation.php
+│
+├── admin/
+│   ├── index.php
+│   ├── users.php
+│   ├── reserves.php
+│   ├── trees.php
+│   ├── transactions.php
+│   ├── reports.php
+│   └── profile.php
+│
+├── user/
+│   ├── index.php
+│   ├── profile.php
+│   ├── transactions.php
+│   ├── receipt.php
+│   └── report.php
+│
+├── payment/
+│   ├── init_payment.php
+│   ├── payment_confirmation.php
+│   └── checkout.php
+│
+├── reserves/
+│   └── idanre.php
+│
+├── index.php
+├── about.php
+├── contact.php
+├── login.php
+├── register.php
+├── logout.php
+└── .htaccess

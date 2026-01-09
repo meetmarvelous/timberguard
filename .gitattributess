@@ -1,0 +1,6 @@
+# Force all text files to use LF and never change them
+* text=auto eol=crlf
+
+# Except for Windows batch files which MUST have CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

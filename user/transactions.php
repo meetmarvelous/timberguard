@@ -59,36 +59,44 @@ $stats = $stats_result->fetch_assoc();
     
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+            <div class="card dashboard-stat dashboard-stat-success h-100">
                 <div class="card-body">
-                    <i class="fas fa-receipt fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $stats['completed']; ?></h3>
                     <p>Completed</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #f44336, #b71c1c);">
+            <div class="card dashboard-stat dashboard-stat-danger h-100">
                 <div class="card-body">
-                    <i class="fas fa-times-circle fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-times-circle" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $stats['failed']; ?></h3>
                     <p>Failed</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #2196f3, #0d47a1);">
+            <div class="card dashboard-stat dashboard-stat-primary h-100">
                 <div class="card-body">
-                    <i class="fas fa-money-bill-wave fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo format_currency($stats['spent']); ?></h3>
                     <p>Total Spent</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #8bc34a, #558b2f);">
+            <div class="card dashboard-stat dashboard-stat-forest h-100">
                 <div class="card-body">
-                    <i class="fas fa-receipt fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $stats['total']; ?></h3>
                     <p>Total Transactions</p>
                 </div>

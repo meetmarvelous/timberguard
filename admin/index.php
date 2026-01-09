@@ -76,46 +76,56 @@ $recent_reports = $conn->query($sql);
 ?>
 <?php include '../includes/header.php'; ?>
 
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="display-5 fw-bold">Admin Dashboard</h1>
-            <p class="lead">Manage forest reserves, timber inventory, and user transactions</p>
+<div class="container py-4 py-md-5">
+    <!-- Page Header -->
+    <div class="admin-page-header mb-4">
+        <div>
+            <h1 class="display-6 fw-bold mb-1">Admin Dashboard</h1>
+            <p class="lead text-muted mb-0">Manage forest reserves, timber inventory, and user transactions</p>
         </div>
     </div>
     
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
             <div class="card dashboard-stat dashboard-stat-forest h-100">
                 <div class="card-body">
-                    <i class="fas fa-leaf fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $total_reserves; ?></h3>
                     <p>Forest Reserves</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3">
             <div class="card dashboard-stat dashboard-stat-trees h-100">
                 <div class="card-body">
-                    <i class="fas fa-tree fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-tree" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $available_trees; ?></h3>
                     <p>Available Trees</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-6 col-md-3">
             <div class="card dashboard-stat dashboard-stat-sold h-100">
                 <div class="card-body">
-                    <i class="fas fa-tree fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $sold_trees; ?></h3>
                     <p>Sold Trees</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat dashboard-stat-reports h-100">
+        <div class="col-6 col-md-3">
+            <div class="card dashboard-stat dashboard-stat-warning h-100">
                 <div class="card-body">
-                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $pending_reports; ?></h3>
                     <p>Pending Reports</p>
                 </div>
@@ -123,11 +133,13 @@ $recent_reports = $conn->query($sql);
         </div>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="row g-4">
+        <!-- Main Content Column -->
+        <div class="col-12 col-lg-8">
+            <!-- Recent Transactions Card -->
             <div class="card border-0 shadow mb-4">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-receipt me-2 text-success"></i>Recent Transactions</h5>
+                <div class="card-header bg-white py-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2 text-success" aria-hidden="true"></i>Recent Transactions</h5>
                     <a href="transactions.php" class="btn btn-sm btn-outline-success">View All</a>
                 </div>
                 <div class="card-body p-0">
@@ -138,21 +150,21 @@ $recent_reports = $conn->query($sql);
                                     <tr>
                                         <th>Payment Code</th>
                                         <th>Customer</th>
-                                        <th>Reserve</th>
-                                        <th>Tree ID</th>
+                                        <th class="hide-mobile">Reserve</th>
+                                        <th class="hide-mobile">Tree ID</th>
                                         <th>Amount</th>
                                         <th>Status</th>
-                                        <th>Date</th>
+                                        <th class="hide-mobile">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php while ($transaction = $recent_transactions->fetch_assoc()): ?>
                                         <tr>
-                                            <td><?php echo $transaction['payment_code']; ?></td>
-                                            <td><?php echo $transaction['user_name']; ?></td>
-                                            <td><?php echo $transaction['reserve_name']; ?></td>
-                                            <td><?php echo str_pad($transaction['tree_id'], 6, '0', STR_PAD_LEFT); ?></td>
-                                            <td><?php echo format_currency($transaction['amount']); ?></td>
+                                            <td><code><?php echo htmlspecialchars($transaction['payment_code']); ?></code></td>
+                                            <td><?php echo htmlspecialchars($transaction['user_name']); ?></td>
+                                            <td class="hide-mobile"><?php echo htmlspecialchars($transaction['reserve_name']); ?></td>
+                                            <td class="hide-mobile"><?php echo str_pad($transaction['tree_id'], 6, '0', STR_PAD_LEFT); ?></td>
+                                            <td><strong><?php echo format_currency($transaction['amount']); ?></strong></td>
                                             <td>
                                                 <?php if ($transaction['status'] === 'completed'): ?>
                                                     <span class="badge bg-success">Completed</span>
@@ -160,24 +172,26 @@ $recent_reports = $conn->query($sql);
                                                     <span class="badge bg-danger">Failed</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo date('M j, Y', strtotime($transaction['created_at'])); ?></td>
+                                            <td class="hide-mobile"><?php echo date('M j, Y', strtotime($transaction['created_at'])); ?></td>
                                         </tr>
                                     <?php endwhile; ?>
                                 </tbody>
                             </table>
                         </div>
                     <?php else: ?>
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-receipt fa-3x mb-3"></i>
-                            <p>No transactions yet.</p>
+                        <div class="empty-state">
+                            <i class="fas fa-receipt" aria-hidden="true"></i>
+                            <h4>No transactions yet</h4>
+                            <p>Transactions will appear here once customers make purchases.</p>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
             
+            <!-- Recent Reports Card -->
             <div class="card border-0 shadow">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-success"></i>Recent Illegal Reports</h5>
+                <div class="card-header bg-white py-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning" aria-hidden="true"></i>Recent Illegal Reports</h5>
                     <a href="reports.php" class="btn btn-sm btn-outline-success">View All</a>
                 </div>
                 <div class="card-body p-0">
@@ -188,21 +202,23 @@ $recent_reports = $conn->query($sql);
                                     <tr>
                                         <th>Reporter</th>
                                         <th>Reserve</th>
-                                        <th>Coordinates</th>
-                                        <th>Description</th>
+                                        <th class="hide-mobile">Coordinates</th>
+                                        <th class="hide-mobile">Description</th>
                                         <th>Status</th>
-                                        <th>Date</th>
+                                        <th class="hide-mobile">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php while ($report = $recent_reports->fetch_assoc()): ?>
                                         <tr>
-                                            <td><?php echo $report['reporter_name']; ?></td>
-                                            <td><?php echo $report['reserve_name']; ?></td>
-                                            <td><?php echo $report['latitude']; ?>, <?php echo $report['longitude']; ?></td>
-                                            <td>
-                                                <div class="text-truncate" style="max-width: 200px;" title="<?php echo $report['description']; ?>">
-                                                    <?php echo $report['description']; ?>
+                                            <td><?php echo htmlspecialchars($report['reporter_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($report['reserve_name']); ?></td>
+                                            <td class="hide-mobile">
+                                                <small><?php echo $report['latitude']; ?>, <?php echo $report['longitude']; ?></small>
+                                            </td>
+                                            <td class="hide-mobile">
+                                                <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($report['description']); ?>">
+                                                    <?php echo htmlspecialchars($report['description']); ?>
                                                 </div>
                                             </td>
                                             <td>
@@ -212,51 +228,56 @@ $recent_reports = $conn->query($sql);
                                                     <span class="badge bg-success">Resolved</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo date('M j, Y', strtotime($report['date_reported'])); ?></td>
+                                            <td class="hide-mobile"><?php echo date('M j, Y', strtotime($report['date_reported'])); ?></td>
                                         </tr>
                                     <?php endwhile; ?>
                                 </tbody>
                             </table>
                         </div>
                     <?php else: ?>
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                            <p>No illegal reports yet.</p>
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                            <h4>No reports yet</h4>
+                            <p>Illegal logging reports will appear here.</p>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-4">
+        <!-- Sidebar Column -->
+        <div class="col-12 col-lg-4">
+            <!-- Transaction Statistics Card -->
             <div class="card border-0 shadow mb-4">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-success"></i>Transaction Statistics</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-success" aria-hidden="true"></i>Transaction Statistics</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-3">
                         <span>Total Transactions:</span>
                         <span class="fw-bold"><?php echo $total_transactions; ?></span>
                     </div>
-                    <div class="progress mb-4" style="height: 20px;">
-                        <div class="progress-bar bg-success" style="width: <?php echo $completed_transactions ? round(($completed_transactions / $total_transactions) * 100) : 0; ?>%">
-                            <?php echo $completed_transactions ? round(($completed_transactions / $total_transactions) * 100) : 0; ?>%
+                    <?php if ($total_transactions > 0): ?>
+                    <div class="progress mb-4" style="height: 12px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo round(($completed_transactions / $total_transactions) * 100); ?>%" aria-valuenow="<?php echo round(($completed_transactions / $total_transactions) * 100); ?>" aria-valuemin="0" aria-valuemax="100">
                         </div>
-                        <div class="progress-bar bg-danger" style="width: <?php echo $failed_transactions ? round(($failed_transactions / $total_transactions) * 100) : 0; ?>%">
-                            <?php echo $failed_transactions ? round(($failed_transactions / $total_transactions) * 100) : 0; ?>%
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: <?php echo round(($failed_transactions / $total_transactions) * 100); ?>%" aria-valuenow="<?php echo round(($failed_transactions / $total_transactions) * 100); ?>" aria-valuemin="0" aria-valuemax="100">
                         </div>
                     </div>
+                    <?php endif; ?>
                     
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-success"><i class="fas fa-check-circle me-1"></i> Completed:</span>
+                        <span class="text-success"><i class="fas fa-check-circle me-1" aria-hidden="true"></i> Completed:</span>
                         <span class="fw-bold"><?php echo $completed_transactions; ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-4">
-                        <span class="text-danger"><i class="fas fa-times-circle me-1"></i> Failed:</span>
+                        <span class="text-danger"><i class="fas fa-times-circle me-1" aria-hidden="true"></i> Failed:</span>
                         <span class="fw-bold"><?php echo $failed_transactions; ?></span>
                     </div>
                     
-                    <h6 class="mb-3"><i class="fas fa-money-bill-wave me-2 text-success"></i>Revenue Summary</h6>
+                    <hr>
+                    
+                    <h6 class="mb-3"><i class="fas fa-money-bill-wave me-2 text-success" aria-hidden="true"></i>Revenue Summary</h6>
                     <?php
                     // Total revenue
                     $sql = "SELECT SUM(amount) as total_revenue FROM transactions WHERE status = 'completed'";
@@ -275,50 +296,56 @@ $recent_reports = $conn->query($sql);
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span>Total Revenue:</span>
-                        <span class="fw-bold"><?php echo format_currency($total_revenue); ?></span>
+                        <span class="fw-bold text-success"><?php echo format_currency($total_revenue); ?></span>
                     </div>
                     
                     <?php if ($revenue_by_reserve->num_rows > 0): ?>
-                        <h6 class="mt-4 mb-3">Top Reserves:</h6>
+                        <h6 class="mt-4 mb-3 text-muted">Top Reserves:</h6>
                         <?php while ($reserve = $revenue_by_reserve->fetch_assoc()): ?>
                             <div class="d-flex justify-content-between mb-2">
-                                <span><?php echo $reserve['reserve_name']; ?>:</span>
-                                <span><?php echo format_currency($reserve['revenue']); ?></span>
+                                <span class="text-truncate" style="max-width: 150px;"><?php echo htmlspecialchars($reserve['reserve_name']); ?></span>
+                                <span class="fw-bold"><?php echo format_currency($reserve['revenue']); ?></span>
                             </div>
                         <?php endwhile; ?>
                     <?php endif; ?>
                 </div>
             </div>
             
-            <div class="card border-0 shadow">
+            <!-- Quick Actions Card -->
+            <div class="card border-0 shadow quick-actions">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-cog me-2 text-success"></i>Quick Actions</h5>
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2 text-success" aria-hidden="true"></i>Quick Actions</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div class="row g-2">
                         <div class="col-6">
-                            <a href="reserves.php" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-leaf me-2"></i>Manage Reserves
+                            <a href="reserves.php" class="btn btn-outline-success w-100">
+                                <i class="fas fa-leaf" aria-hidden="true"></i>
+                                <span>Reserves</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="trees.php" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-tree me-2"></i>Manage Trees
+                            <a href="trees.php" class="btn btn-outline-success w-100">
+                                <i class="fas fa-tree" aria-hidden="true"></i>
+                                <span>Trees</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="transactions.php" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-receipt me-2"></i>View Transactions
+                            <a href="transactions.php" class="btn btn-outline-success w-100">
+                                <i class="fas fa-receipt" aria-hidden="true"></i>
+                                <span>Transactions</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="reports.php" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-exclamation-triangle me-2"></i>View Reports
+                            <a href="reports.php" class="btn btn-outline-success w-100">
+                                <i class="fas fa-flag" aria-hidden="true"></i>
+                                <span>Reports</span>
                             </a>
                         </div>
                         <div class="col-12">
-                            <a href="profile.php" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-user-cog me-2"></i>Manage Profile
+                            <a href="profile.php" class="btn btn-success w-100">
+                                <i class="fas fa-user-cog" aria-hidden="true"></i>
+                                <span>Manage Profile</span>
                             </a>
                         </div>
                     </div>

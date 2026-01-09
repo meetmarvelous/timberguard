@@ -20,7 +20,7 @@ $breadcrumb = [
     
     <div class="row">
         <div class="col-md-7 mb-4">
-            <div class="card border-0 shadow">
+            <div class="card border-0 shadow h-100">
                 <div class="card-body p-5">
                     <h2 class="section-title d-inline-block mb-4">Send Us a Message</h2>
                     
@@ -59,43 +59,43 @@ $breadcrumb = [
                 <div class="card-body p-5">
                     <h2 class="section-title d-inline-block mb-4">Contact Information</h2>
                     
-                    <div class="d-flex mb-4">
-                        <div class="p-3 bg-success text-white rounded-circle me-3">
+                    <div class="contact-info-item">
+                        <div class="contact-icon-wrapper">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        <div>
+                        <div class="contact-content">
                             <h5>Address</h5>
-                            <p class="mb-0">University of Ibadan<br>Forestry Department<br>Ibadan, Oyo State<br>Nigeria</p>
+                            <p>University of Ibadan<br>Forestry Department<br>Ibadan, Oyo State<br>Nigeria</p>
                         </div>
                     </div>
                     
-                    <div class="d-flex mb-4">
-                        <div class="p-3 bg-success text-white rounded-circle me-3">
+                    <div class="contact-info-item">
+                        <div class="contact-icon-wrapper">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <div>
+                        <div class="contact-content">
                             <h5>Phone</h5>
-                            <p class="mb-0">+234 800 000 0000<br>+234 800 000 0001</p>
+                            <p>+234 800 000 0000<br>+234 800 000 0001</p>
                         </div>
                     </div>
                     
-                    <div class="d-flex mb-4">
-                        <div class="p-3 bg-success text-white rounded-circle me-3">
+                    <div class="contact-info-item">
+                        <div class="contact-icon-wrapper">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <div>
+                        <div class="contact-content">
                             <h5>Email</h5>
-                            <p class="mb-0">info@timberguard.com<br>support@timberguard.com</p>
+                            <p>info@timberguard.com<br>support@timberguard.com</p>
                         </div>
                     </div>
                     
-                    <div class="d-flex">
-                        <div class="p-3 bg-success text-white rounded-circle me-3">
+                    <div class="contact-info-item mb-0">
+                        <div class="contact-icon-wrapper">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <div>
+                        <div class="contact-content">
                             <h5>Office Hours</h5>
-                            <p class="mb-0">Monday - Friday: 8:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM<br>Sunday: Closed</p>
+                            <p>Monday - Friday: 8:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM<br>Sunday: Closed</p>
                         </div>
                     </div>
                 </div>
@@ -106,11 +106,11 @@ $breadcrumb = [
                     <h5 class="mb-4">Emergency Reporting</h5>
                     <p class="mb-3">For urgent illegal logging reports, please contact our 24/7 emergency hotline:</p>
                     <div class="d-flex align-items-center">
-                        <div class="p-2 bg-danger text-white rounded-circle me-3">
+                        <div class="emergency-contact-wrapper">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <div>
-                            <h6 class="mb-0">+234 800 000 0002</h6>
+                            <h6 class="mb-0 fs-5">+234 800 000 0002</h6>
                         </div>
                     </div>
                 </div>

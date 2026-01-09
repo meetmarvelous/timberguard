@@ -11,12 +11,12 @@ $hide_banner = true;
 <section class="hero-section">
     <div class="container text-center">
         <h1 class="display-3 fw-bold mb-4">Sustainable Forestry Management</h1>
-        <p class="lead mb-5">Track, trade, and protect our precious forest resources with our comprehensive management system</p>
+        <p class="lead text-white mb-5">Track, trade, and protect our precious forest resources with our comprehensive management system</p>
         <div class="d-flex justify-content-center gap-3">
             <a href="reserve_list.php" class="btn btn-light btn-lg px-4 py-3 fs-5">
                 <i class="fas fa-leaf me-2"></i>Browse Timber
             </a>
-            <a href="contact.php" class="btn btn-outline-light btn-lg px-4 py-3 fs-5">
+            <a href="<?php echo is_logged_in() ? 'user/report.php' : 'login.php'; ?>" class="btn btn-outline-light btn-lg px-4 py-3 fs-5">
                 <i class="fas fa-bullhorn me-2"></i>Report Illegal Activity
             </a>
         </div>

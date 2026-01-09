@@ -62,27 +62,33 @@ $recent_transactions = $stmt->get_result();
     
     <div class="row mb-5">
         <div class="col-md-4 mb-4">
-            <div class="card dashboard-stat available h-100">
+            <div class="card dashboard-stat dashboard-stat-success h-100">
                 <div class="card-body">
-                    <i class="fas fa-receipt fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $completed_transactions; ?></h3>
                     <p>Completed Transactions</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card dashboard-stat sold h-100">
+            <div class="card dashboard-stat dashboard-stat-danger h-100">
                 <div class="card-body">
-                    <i class="fas fa-times-circle fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-times-circle" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $failed_transactions; ?></h3>
                     <p>Failed Transactions</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-4">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+            <div class="card dashboard-stat dashboard-stat-forest h-100">
                 <div class="card-body">
-                    <i class="fas fa-leaf fa-3x mb-3"></i>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                    </div>
                     <h3><?php echo $total_transactions; ?></h3>
                     <p>Total Transactions</p>
                 </div>
@@ -92,10 +98,32 @@ $recent_transactions = $stmt->get_result();
     
     <div class="row">
         <div class="col-md-8">
+            <!-- Browse Inventory Card (Always Visible) -->
+            <div class="card border-0 shadow mb-4 bg-success text-white overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative" style="z-index: 1;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="fw-bold mb-2 text-white">Looking for Timber?</h4>
+                            <p class="mb-3 text-white-50">Browse our extensive inventory of high-quality timber from sustainable forest reserves.</p>
+                            <a href="../reserve_list.php" class="btn btn-light text-success fw-bold">
+                                <i class="fas fa-tree me-2"></i>Browse Timber Inventory
+                            </a>
+                        </div>
+                        <div class="col-md-4 d-none d-md-block text-end">
+                            <i class="fas fa-shopping-basket fa-6x text-white" style="opacity: 0.2;"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- Decorative background circle -->
+                <div class="position-absolute top-0 end-0 translate-middle-y" style="width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; margin-top: -50px; margin-right: -50px;"></div>
+            </div>
+
             <div class="card border-0 shadow mb-4">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-history me-2 text-success"></i>Recent Transactions</h5>
+                    <?php if ($recent_transactions->num_rows > 0): ?>
                     <a href="transactions.php" class="btn btn-sm btn-outline-success">View All</a>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body p-0">
                     <?php if ($recent_transactions->num_rows > 0): ?>
@@ -138,10 +166,17 @@ $recent_transactions = $stmt->get_result();
                             </table>
                         </div>
                     <?php else: ?>
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-receipt fa-3x mb-3"></i>
-                            <p>You haven't made any transactions yet.</p>
-                            <a href="../reserve_list.php" class="btn btn-success">Browse Timber Inventory</a>
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-receipt fa-3x text-muted"></i>
+                                </div>
+                            </div>
+                            <h5 class="text-muted">No transactions yet</h5>
+                            <p class="text-muted mb-4">Your purchase history will appear here once you make your first purchase.</p>
+                            <a href="../reserve_list.php" class="btn btn-outline-success">
+                                <i class="fas fa-search me-2"></i>Find Trees to Buy
+                            </a>
                         </div>
                     <?php endif; ?>
                 </div>

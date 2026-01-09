@@ -28,28 +28,15 @@ if ($result->num_rows === 0) {
 
 $reserve = $result->fetch_assoc();
 
-// Pagination variables
-$items_per_page = 12; // Number of trees per page
-$current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$offset = ($current_page - 1) * $items_per_page;
-
-// Get available trees from this reserve with pagination
-$sql = "SELECT SQL_CALC_FOUND_ROWS * 
+// Get available trees from this reserve
+$sql = "SELECT * 
         FROM trees 
         WHERE reserve_id = ? AND status = 'available'
-        ORDER BY created_at DESC
-        LIMIT ? OFFSET ?";
+        ORDER BY created_at DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("iii", $reserve_id, $items_per_page, $offset);
+$stmt->bind_param("i", $reserve_id);
 $stmt->execute();
 $available_trees = $stmt->get_result();
-
-// Get total count for pagination
-$total_sql = "SELECT FOUND_ROWS() as total";
-$total_result = $conn->query($total_sql);
-$total_row = $total_result->fetch_assoc();
-$total_trees = $total_row['total'];
-$total_pages = ceil($total_trees / $items_per_page);
 
 // Get sold trees from this reserve
 $sql = "SELECT * 
@@ -108,19 +95,19 @@ $breadcrumb = [
     <div class="row">
         <div class="col-md-12 mb-4">
             <ul class="nav nav-tabs" id="reserveTabs" role="tablist">
-                <li class="nav-item text-success" role="presentation">
+                <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button" role="tab" aria-controls="available" aria-selected="true">
-                        <i class="fas fa-check-circle me-1 text-success"></i><span class="text-success">Available Trees(<?php echo $tree_stats['available']; ?>)</span> 
+                        <i class="fas fa-check-circle me-1 text-success"></i>Available Trees (<?php echo $tree_stats['available']; ?>)
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="sold-tab" data-bs-toggle="tab" data-bs-target="#sold" type="button" role="tab" aria-controls="sold" aria-selected="false">
-                        <span class="text-danger"><i class="fas fa-times-circle me-1 text-danger"></i>Sold Trees (<?php echo $tree_stats['sold']; ?>) </span>
+                        <i class="fas fa-times-circle me-1 text-danger"></i>Sold Trees (<?php echo $tree_stats['sold']; ?>)
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="false">
-                         <span class="text-primary"><i class="fas fa-info-circle me-1"></i>Reserve Information</span>
+                        <i class="fas fa-info-circle me-1"></i>Reserve Information
                     </button>
                 </li>
             </ul>
@@ -133,12 +120,12 @@ $breadcrumb = [
             <?php if ($available_trees->num_rows > 0): ?>
                 <div class="row">
                     <?php while ($tree = $available_trees->fetch_assoc()): ?>
-                        <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card tree-card h-100">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="badge bg-success">Available</span>
-                                        <span class="text-muted"><i class="fas fa-tree me-1"></i> <?php echo $tree['species']; ?></span>
+                                        <span class="text-muted"><i class="fas fa-tree me-1"></i> <em><?php echo $tree['species']; ?></em> </span>
                                     </div>
                                     <h5 class="card-title mb-3">Tree ID: <?php echo str_pad($tree['id'], 6, '0', STR_PAD_LEFT); ?></h5>
 
@@ -154,7 +141,7 @@ $breadcrumb = [
                                             </tr>
                                             <tr>
                                                 <th>DBH (cm):</th>
-                                                <td><?php echo $tree['DBH']; ?></td>
+                                                <td><?php echo $tree['DBH'] * 100; ?></td>
                                             </tr>
                                             <tr>
                                                 <th>Basal Area (m²):</th>
@@ -164,6 +151,7 @@ $breadcrumb = [
                                                 <th>Volume (m³):</th>
                                                 <td><?php echo $tree['volume']; ?></td>
                                             </tr>
+                                            <!-- Added Latitude and Longitude between Volume and Price -->
                                             <tr>
                                                 <th>Coordinates:</th>
                                                 <td>
@@ -179,7 +167,7 @@ $breadcrumb = [
                                     </div>
 
                                     <?php if (is_logged_in() && has_role('customer')): ?>
-                                        <a href="payment/checkout.php?tree_id=<?php echo $tree['id']; ?>&reserve_id=<?php echo $reserve_id; ?>" class="btn btn-success w-100">
+                                        <a href="checkout.php?tree_id=<?php echo $tree['id']; ?>&reserve_id=<?php echo $reserve_id; ?>" class="btn btn-success w-100">
                                             <i class="fas fa-shopping-cart me-2"></i>Buy Now
                                         </a>
                                     <?php else: ?>
@@ -192,77 +180,6 @@ $breadcrumb = [
                         </div>
                     <?php endwhile; ?>
                 </div>
-
-                <!-- Pagination -->
-                <?php if ($total_pages > 1): ?>
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center flex-wrap">
-                            <!-- Previous Button -->
-                            <li class="page-item <?php echo $current_page <= 1 ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="<?php echo $current_page <= 1 ? '#' : '?id=' . $reserve_id . '&page=' . ($current_page - 1); ?>" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            <!-- First Page -->
-                            <?php if ($current_page > 3): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?id=<?php echo $reserve_id; ?>&page=1">1</a>
-                                </li>
-                                <?php if ($current_page > 4): ?>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                <?php endif; ?>
-                            <?php endif; ?>
-
-                            <!-- Page Numbers -->
-                            <?php
-                            $start_page = max(1, $current_page - 1);
-                            $end_page = min($total_pages, $current_page + 1);
-
-                            // Adjust start and end pages if near the beginning or end
-                            if ($current_page <= 3) {
-                                $end_page = min(5, $total_pages);
-                            }
-                            if ($current_page >= $total_pages - 2) {
-                                $start_page = max($total_pages - 4, 1);
-                            }
-
-                            for ($i = $start_page; $i <= $end_page; $i++): ?>
-                                <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?id=<?php echo $reserve_id; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                                </li>
-                            <?php endfor; ?>
-
-                            <!-- Last Page -->
-                            <?php if ($current_page < $total_pages - 2): ?>
-                                <?php if ($current_page < $total_pages - 3): ?>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                <?php endif; ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?id=<?php echo $reserve_id; ?>&page=<?php echo $total_pages; ?>"><?php echo $total_pages; ?></a>
-                                </li>
-                            <?php endif; ?>
-
-                            <!-- Next Button -->
-                            <li class="page-item <?php echo $current_page >= $total_pages ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="<?php echo $current_page >= $total_pages ? '#' : '?id=' . $reserve_id . '&page=' . ($current_page + 1); ?>" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-
-                        <!-- Page Info -->
-                        <div class="text-center mt-3">
-                            <small class="text-muted">
-                                Showing <?php echo ($offset + 1); ?> to <?php echo min($offset + $items_per_page, $total_trees); ?> of <?php echo $total_trees; ?> trees
-                            </small>
-                        </div>
-                    </nav>
-                <?php endif; ?>
             <?php else: ?>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>Currently, there are no available trees in this reserve.
@@ -275,7 +192,7 @@ $breadcrumb = [
             <?php if ($sold_trees->num_rows > 0): ?>
                 <div class="row">
                     <?php while ($tree = $sold_trees->fetch_assoc()): ?>
-                        <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="col-md-4 mb-4">
                             <div class="card tree-card h-100" style="opacity: 0.7;">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
@@ -296,7 +213,7 @@ $breadcrumb = [
                                             </tr>
                                             <tr>
                                                 <th>DBH (cm):</th>
-                                                <td><?php echo $tree['DBH']; ?></td>
+                                                <td><?php echo $tree['DBH'] * 100; ?></td>
                                             </tr>
                                             <tr>
                                                 <th>Basal Area (m²):</th>
@@ -306,6 +223,7 @@ $breadcrumb = [
                                                 <th>Volume (m³):</th>
                                                 <td><?php echo $tree['volume']; ?></td>
                                             </tr>
+                                            <!-- Added Latitude and Longitude between Volume and Price -->
                                             <tr>
                                                 <th>Coordinates:</th>
                                                 <td>
@@ -367,15 +285,15 @@ $breadcrumb = [
                                 <div class="col-6 mb-3">
                                     <div class="dashboard-stat available">
                                         <i class="fas fa-tree"></i>
-                                        <h3 class="text-white"><?php echo $tree_stats['available']; ?></h3>
-                                        <p class="text-white">Available Trees</p>
+                                        <h3><?php echo $tree_stats['available']; ?></h3>
+                                        <p>Available Trees</p>
                                     </div>
                                 </div>
                                 <div class="col-6 mb-3">
                                     <div class="dashboard-stat sold">
                                         <i class="fas fa-tree"></i>
-                                        <h3 class="text-white"><?php echo $tree_stats['sold']; ?></h3>
-                                        <p class="text-white">Sold Trees</p>
+                                        <h3><?php echo $tree_stats['sold']; ?></h3>
+                                        <p>Sold Trees</p>
                                     </div>
                                 </div>
                                 <div class="col-6">
@@ -417,7 +335,7 @@ $breadcrumb = [
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-white">Report Illegal Activity</h5>
+                <h5 class="modal-title">Report Illegal Activity</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="user/report.php">

@@ -68,12 +68,16 @@ $sql = "CREATE TABLE IF NOT EXISTS trees (
     DBH DECIMAL(10,4) NOT NULL,
     basal_area DECIMAL(10,6) NOT NULL,
     volume DECIMAL(10,6) NOT NULL,
+    latitude DECIMAL(10,6) NOT NULL,
+    longitude DECIMAL(10,6) NOT NULL,
     status ENUM('available', 'sold') DEFAULT 'available',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (reserve_id) REFERENCES forest_reserves(id) ON DELETE CASCADE,
     INDEX idx_reserve_id (reserve_id),
     INDEX idx_species (species),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_coordinates (latitude, longitude),
+    INDEX idx_trees_reserve_status (reserve_id, status)
 )";
 
 if ($conn->query($sql) === TRUE) {
@@ -99,7 +103,8 @@ $sql = "CREATE TABLE IF NOT EXISTS transactions (
     INDEX idx_user_id (user_id),
     INDEX idx_payment_code (payment_code),
     INDEX idx_status (status),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_transactions_user_status (user_id, status)
 )";
 
 if ($conn->query($sql) === TRUE) {
@@ -113,7 +118,8 @@ $sql = "CREATE TABLE IF NOT EXISTS illegal_reports (
     id INT AUTO_INCREMENT PRIMARY KEY,
     reporter_name VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
-    coordinates VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(10,8) NOT NULL,
     reserve_id INT NOT NULL,
     date_reported TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'resolved') DEFAULT 'pending',
@@ -121,7 +127,8 @@ $sql = "CREATE TABLE IF NOT EXISTS illegal_reports (
     FOREIGN KEY (reserve_id) REFERENCES forest_reserves(id) ON DELETE CASCADE,
     INDEX idx_reserve_id (reserve_id),
     INDEX idx_status (status),
-    INDEX idx_date_reported (date_reported)
+    INDEX idx_date_reported (date_reported),
+    INDEX idx_illegal_reports_status (status, date_reported)
 )";
 
 if ($conn->query($sql) === TRUE) {
@@ -142,7 +149,8 @@ $sql = "CREATE TABLE IF NOT EXISTS logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_action (action),
-    INDEX idx_timestamp (timestamp)
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_logs_timestamp (timestamp)
 )";
 
 if ($conn->query($sql) === TRUE) {
@@ -233,9 +241,11 @@ $treeData = [
 $species = "Tectona Grandis";
 $status = "available";
 
-$treeInsertSql = "INSERT INTO trees (reserve_id, species, MTH, THT, DBH, basal_area, volume, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$treeInsertSql = "INSERT INTO trees (reserve_id, species, MTH, THT, DBH, basal_area, volume, latitude, longitude, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 $treeStmt = $conn->prepare($treeInsertSql);
-$treeStmt->bind_param("isdssddd", $forestReserveId, $species, $MTH, $THT, $DBH, $basal_area, $volume, $status);
+$latitude = 0.0;
+$longitude = 0.0;
+$treeStmt->bind_param("isdssdddds", $forestReserveId, $species, $MTH, $THT, $DBH, $basal_area, $volume, $latitude, $longitude, $status);
 
 $treeCount = 0;
 foreach ($treeData as $data) {

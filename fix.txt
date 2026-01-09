@@ -80,3 +80,11 @@ admin/index.php :
 
 
 For example on the,  still have the two scrollbar on the right one for the 
+
+______________________________________________
+
+
+To fix
+
+Breadcrumb
+Payment

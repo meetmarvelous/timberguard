@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $_SESSION['message'] = "Your report has been submitted successfully. Thank you for helping protect our forests!";
             $_SESSION['message_type'] = "success";
-            redirect('report.php');
+            redirect('user/report.php');
         } else {
             $errors[] = "Failed to submit report. Please try again.";
         }
@@ -90,7 +90,7 @@ $reserves = $conn->query($sql);
         <div class="col-md-10">
             <div class="card border-0 shadow">
                 <div class="card-header bg-success text-white py-4">
-                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Report Illegal Logging Activity</h4>
+                    <h4 class="mb-0 text-white"><i class="fas fa-exclamation-triangle me-2"></i>Report Illegal Logging Activity</h4>
                 </div>
                 <div class="card-body p-5">
                     <div class="alert alert-info mb-4">
@@ -118,9 +118,14 @@ $reserves = $conn->query($sql);
                         
                         <div class="mb-4">
                             <label for="coordinates" class="form-label">Coordinates (Latitude, Longitude)</label>
-                            <input type="text" class="form-control form-control-lg" id="coordinates" name="coordinates" 
-                                   placeholder="e.g., 7.562858, 5.205806" required>
-                            <div class="form-text">You can use Google Maps to find the exact coordinates of the location.</div>
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" id="coordinates" name="coordinates" 
+                                       placeholder="e.g., 7.562858, 5.205806" required>
+                                <button class="btn btn-outline-success" type="button" id="getLocationBtn">
+                                    <i class="fas fa-location-arrow me-2"></i>Use Current Location
+                                </button>
+                            </div>
+                            <div class="form-text" id="locationStatus">You can use Google Maps to find the exact coordinates or click the button to use your current location.</div>
                         </div>
                         
                         <div class="mb-4">
@@ -169,5 +174,66 @@ $reserves = $conn->query($sql);
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const getLocationBtn = document.getElementById('getLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+    const coordinatesInput = document.getElementById('coordinates');
+
+    if (getLocationBtn) {
+        getLocationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                locationStatus.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Geolocation is not supported by your browser</span>';
+                return;
+            }
+
+            // Show loading state
+            const originalBtnText = getLocationBtn.innerHTML;
+            getLocationBtn.disabled = true;
+            getLocationBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Locating...';
+            locationStatus.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i>Retrieving your location...</span>';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const long = position.coords.longitude.toFixed(6);
+                    coordinatesInput.value = `${lat}, ${long}`;
+                    
+                    locationStatus.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i>Location retrieved successfully!</span>';
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = originalBtnText;
+                },
+                (error) => {
+                    let msg = 'Unable to retrieve your location';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            msg = "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            msg = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            msg = "The request to get user location timed out.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            msg = "An unknown error occurred.";
+                            break;
+
+                    }
+                    locationStatus.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>${msg}</span>`;
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = originalBtnText;
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 30000,
+                    maximumAge: 60000
+                }
+            );
+        });
+    }
+});
+</script>
 
 <?php include '../includes/footer.php'; ?>

@@ -14,7 +14,7 @@ if (!has_role('admin') && !has_role('forest manager')) {
 $page_title = "Manage Forest Reserves";
 $breadcrumb = [
     ['title' => 'Home', 'url' => 'index.php', 'active' => false],
-    ['title' => 'Admin Dashboard', 'url' => 'index.php', 'active' => false],
+    ['title' => 'Admin Dashboard', 'url' => 'admin/index.php', 'active' => false],
     ['title' => 'Manage Reserves', 'url' => '', 'active' => true]
 ];
 
@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $location = sanitize_input($_POST['location']);
         $description = sanitize_input($_POST['description']);
         
-        // Validation
         $errors = [];
         
         if (empty($reserve_name)) {
@@ -44,9 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sss", $reserve_name, $location, $description);
             
             if ($stmt->execute()) {
-                // Log activity
                 log_activity($_SESSION['user_id'], 'reserve_add', 'Added new forest reserve: ' . $reserve_name);
-                
                 $_SESSION['message'] = "Forest reserve added successfully.";
                 $_SESSION['message_type'] = "success";
                 redirect('admin/reserves.php');
@@ -66,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $location = sanitize_input($_POST['location']);
         $description = sanitize_input($_POST['description']);
         
-        // Validation
         $errors = [];
         
         if (empty($reserve_name)) {
@@ -86,9 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssi", $reserve_name, $location, $description, $id);
             
             if ($stmt->execute()) {
-                // Log activity
                 log_activity($_SESSION['user_id'], 'reserve_edit', 'Edited forest reserve: ' . $reserve_name);
-                
                 $_SESSION['message'] = "Forest reserve updated successfully.";
                 $_SESSION['message_type'] = "success";
                 redirect('admin/reserves.php');
@@ -109,7 +103,6 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = intval($_GET['delete']);
     
     global $conn;
-    // First get the reserve name for logging
     $sql = "SELECT reserve_name FROM forest_reserves WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
@@ -120,15 +113,12 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
         $reserve = $result->fetch_assoc();
         $reserve_name = $reserve['reserve_name'];
         
-        // Delete the reserve
         $sql = "DELETE FROM forest_reserves WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
-            // Log activity
             log_activity($_SESSION['user_id'], 'reserve_delete', 'Deleted forest reserve: ' . $reserve_name);
-            
             $_SESSION['message'] = "Forest reserve deleted successfully.";
             $_SESSION['message_type'] = "success";
         } else {
@@ -147,31 +137,30 @@ $reserves = $conn->query($sql);
 ?>
 <?php include '../includes/header.php'; ?>
 
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="display-5 fw-bold">Forest Reserves</h1>
-            <p class="lead">Manage forest reserves and their information</p>
+<div class="container py-4 py-md-5">
+    <!-- Page Header -->
+    <div class="admin-page-header mb-4">
+        <div>
+            <h1 class="display-6 fw-bold mb-1">Forest Reserves</h1>
+            <p class="lead text-muted mb-0">Manage forest reserves and their information</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addReserveModal">
-                <i class="fas fa-plus me-2"></i>Add New Reserve
-            </button>
-        </div>
+        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addReserveModal">
+            <i class="fas fa-plus me-2" aria-hidden="true"></i>Add New Reserve
+        </button>
     </div>
     
     <?php if ($reserves->num_rows > 0): ?>
         <div class="card border-0 shadow">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" id="reservesTable">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
                                 <th>Reserve Name</th>
-                                <th>Location</th>
+                                <th class="hide-mobile">Location</th>
                                 <th>Tree Count</th>
-                                <th>Date Added</th>
+                                <th class="hide-mobile">Date Added</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -191,39 +180,51 @@ $reserves = $conn->query($sql);
                                 $tree_count = $stmt->get_result()->fetch_assoc();
                                 ?>
                                 <tr>
-                                    <td><?php echo str_pad($reserve['id'], 4, '0', STR_PAD_LEFT); ?></td>
+                                    <td><code><?php echo str_pad($reserve['id'], 4, '0', STR_PAD_LEFT); ?></code></td>
                                     <td>
-                                        <strong><?php echo $reserve['reserve_name']; ?></strong>
-                                        <div class="text-muted small"><?php echo substr($reserve['description'], 0, 100) . (strlen($reserve['description']) > 100 ? '...' : ''); ?></div>
+                                        <strong><?php echo htmlspecialchars($reserve['reserve_name']); ?></strong>
+                                        <div class="text-muted small text-truncate" style="max-width: 200px;">
+                                            <?php echo htmlspecialchars(substr($reserve['description'], 0, 80)) . (strlen($reserve['description']) > 80 ? '...' : ''); ?>
+                                        </div>
                                     </td>
-                                    <td><?php echo $reserve['location']; ?></td>
+                                    <td class="hide-mobile"><?php echo htmlspecialchars($reserve['location']); ?></td>
                                     <td>
-                                        <span class="badge bg-success"><?php echo $tree_count['available']; ?> Available</span>
-                                        <span class="badge bg-danger"><?php echo $tree_count['sold']; ?> Sold</span>
-                                        <span class="text-muted">(<?php echo $tree_count['total']; ?> Total)</span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <span class="badge bg-success"><?php echo $tree_count['available'] ?: 0; ?> Available</span>
+                                            <span class="badge bg-danger"><?php echo $tree_count['sold'] ?: 0; ?> Sold</span>
+                                        </div>
+                                        <small class="text-muted">(<?php echo $tree_count['total'] ?: 0; ?> Total)</small>
                                     </td>
-                                    <td><?php echo date('M j, Y', strtotime($reserve['created_at'])); ?></td>
+                                    <td class="hide-mobile"><?php echo date('M j, Y', strtotime($reserve['created_at'])); ?></td>
                                     <td>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex gap-1">
+                                            <a href="trees.php?reserve_id=<?php echo $reserve['id']; ?>" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               data-bs-toggle="tooltip" title="View Trees"
+                                               aria-label="View trees in <?php echo htmlspecialchars($reserve['reserve_name']); ?>">
+                                                <i class="fas fa-tree" aria-hidden="true"></i>
+                                            </a>
                                             <button type="button" class="btn btn-sm btn-outline-success" 
-                                                    data-bs-toggle="modal" data-bs-target="#editReserveModal<?php echo $reserve['id']; ?>">
-                                                <i class="fas fa-edit"></i>
+                                                    data-bs-toggle="modal" data-bs-target="#editReserveModal<?php echo $reserve['id']; ?>"
+                                                    aria-label="Edit <?php echo htmlspecialchars($reserve['reserve_name']); ?>">
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
                                             </button>
                                             <a href="reserves.php?delete=<?php echo $reserve['id']; ?>" 
                                                class="btn btn-sm btn-outline-danger" 
-                                               onclick="return confirm('Are you sure you want to delete this forest reserve? This action cannot be undone.');">
-                                                <i class="fas fa-trash"></i>
+                                               onclick="return confirm('Are you sure you want to delete this forest reserve? This will also delete all associated trees. This action cannot be undone.');"
+                                               aria-label="Delete <?php echo htmlspecialchars($reserve['reserve_name']); ?>">
+                                                <i class="fas fa-trash" aria-hidden="true"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                                 
                                 <!-- Edit Reserve Modal -->
-                                <div class="modal fade" id="editReserveModal<?php echo $reserve['id']; ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
+                                <div class="modal fade" id="editReserveModal<?php echo $reserve['id']; ?>" tabindex="-1" aria-labelledby="editReserveModalLabel<?php echo $reserve['id']; ?>" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Edit Forest Reserve</h5>
+                                                <h5 class="modal-title" id="editReserveModalLabel<?php echo $reserve['id']; ?>">Edit Forest Reserve</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form method="POST" action="reserves.php">
@@ -232,26 +233,26 @@ $reserves = $conn->query($sql);
                                                     <input type="hidden" name="id" value="<?php echo $reserve['id']; ?>">
                                                     
                                                     <div class="mb-3">
-                                                        <label for="reserve_name_<?php echo $reserve['id']; ?>" class="form-label">Reserve Name</label>
+                                                        <label for="reserve_name_<?php echo $reserve['id']; ?>" class="form-label">Reserve Name <span class="text-danger">*</span></label>
                                                         <input type="text" class="form-control" id="reserve_name_<?php echo $reserve['id']; ?>" 
-                                                               name="reserve_name" value="<?php echo $reserve['reserve_name']; ?>" required>
+                                                               name="reserve_name" value="<?php echo htmlspecialchars($reserve['reserve_name']); ?>" required>
                                                     </div>
                                                     
                                                     <div class="mb-3">
-                                                        <label for="location_<?php echo $reserve['id']; ?>" class="form-label">Location</label>
+                                                        <label for="location_<?php echo $reserve['id']; ?>" class="form-label">Location <span class="text-danger">*</span></label>
                                                         <input type="text" class="form-control" id="location_<?php echo $reserve['id']; ?>" 
-                                                               name="location" value="<?php echo $reserve['location']; ?>" required>
+                                                               name="location" value="<?php echo htmlspecialchars($reserve['location']); ?>" required>
                                                     </div>
                                                     
                                                     <div class="mb-3">
                                                         <label for="description_<?php echo $reserve['id']; ?>" class="form-label">Description</label>
                                                         <textarea class="form-control" id="description_<?php echo $reserve['id']; ?>" 
-                                                                  name="description" rows="3"><?php echo $reserve['description']; ?></textarea>
+                                                                  name="description" rows="4"><?php echo htmlspecialchars($reserve['description']); ?></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-success">Save Changes</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-2" aria-hidden="true"></i>Save Changes</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -265,12 +266,12 @@ $reserves = $conn->query($sql);
         </div>
     <?php else: ?>
         <div class="card border-0 shadow">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-leaf fa-3x text-muted mb-3"></i>
+            <div class="card-body empty-state">
+                <i class="fas fa-leaf" aria-hidden="true"></i>
                 <h4>No forest reserves found</h4>
-                <p class="text-muted mb-4">Get started by adding your first forest reserve.</p>
+                <p>Get started by adding your first forest reserve.</p>
                 <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addReserveModal">
-                    <i class="fas fa-plus me-2"></i>Add First Reserve
+                    <i class="fas fa-plus me-2" aria-hidden="true"></i>Add First Reserve
                 </button>
             </div>
         </div>
@@ -278,11 +279,11 @@ $reserves = $conn->query($sql);
 </div>
 
 <!-- Add Reserve Modal -->
-<div class="modal fade" id="addReserveModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="addReserveModal" tabindex="-1" aria-labelledby="addReserveModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New Forest Reserve</h5>
+                <h5 class="modal-title" id="addReserveModalLabel">Add New Forest Reserve</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="reserves.php">
@@ -290,30 +291,50 @@ $reserves = $conn->query($sql);
                     <input type="hidden" name="add_reserve" value="1">
                     
                     <div class="mb-3">
-                        <label for="reserve_name" class="form-label">Reserve Name</label>
+                        <label for="reserve_name" class="form-label">Reserve Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="reserve_name" name="reserve_name" 
                                placeholder="Enter reserve name" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="location" class="form-label">Location</label>
+                        <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="location" name="location" 
                                placeholder="Enter reserve location" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" 
+                        <textarea class="form-control" id="description" name="description" rows="4" 
                                   placeholder="Enter reserve description"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Add Reserve</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-plus me-2" aria-hidden="true"></i>Add Reserve</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php 
+$extra_scripts = "
+<script>
+    $(document).ready(function() {
+        $('#reservesTable').DataTable({
+            order: [[4, 'desc']],
+            pageLength: 25,
+            responsive: true,
+            columnDefs: [
+                { orderable: false, targets: [5] }
+            ],
+            language: {
+                search: '_INPUT_',
+                searchPlaceholder: 'Search reserves...'
+            }
+        });
+    });
+</script>
+";
+include '../includes/footer.php'; 
+?>

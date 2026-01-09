@@ -112,7 +112,7 @@ $access_code = $transaction_data['data']['access_code'];
 $sql = "INSERT INTO transactions (tree_id, user_id, reserve_id, payment_code, amount, status, created_at) 
         VALUES (?, ?, ?, ?, ?, 'failed', NOW())";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("iiids", $tree_id, $user_id, $reserve_id, $payment_code, $amount);
+$stmt->bind_param("iiisd", $tree_id, $user_id, $reserve_id, $payment_code, $amount);
 
 if (!$stmt->execute()) {
     $_SESSION['message'] = "Failed to create transaction record.";

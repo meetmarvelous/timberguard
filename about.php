@@ -27,48 +27,48 @@ $breadcrumb = [
             <p class="fs-5">At <?php echo SITE_NAME; ?>, we're dedicated to creating a sustainable future for Nigeria's forests through innovative technology and responsible management practices.</p>
             <p>Our mission is to balance economic development with environmental conservation by providing a transparent, secure platform for timber trading while actively protecting our forest reserves from illegal activities.</p>
             
-            <div class="mt-4">
-                <h5>Our Core Values:</h5>
-                <div class="row mt-3">
+            <div class="mt-5">
+                <h4 class="mb-4">Our Core Values:</h4>
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <div class="d-flex mb-3">
-                            <div class="p-2 bg-success text-white rounded-circle me-3">
+                        <div class="core-value-card d-flex align-items-center">
+                            <div class="core-value-icon-wrapper">
                                 <i class="fas fa-leaf"></i>
                             </div>
-                            <div>
+                            <div class="core-value-content">
                                 <h6 class="mb-1">Sustainability</h6>
                                 <p class="small mb-0">We prioritize long-term forest health over short-term gains.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="d-flex mb-3">
-                            <div class="p-2 bg-success text-white rounded-circle me-3">
+                        <div class="core-value-card d-flex align-items-center">
+                            <div class="core-value-icon-wrapper">
                                 <i class="fas fa-shield-alt"></i>
                             </div>
-                            <div>
+                            <div class="core-value-content">
                                 <h6 class="mb-1">Security</h6>
                                 <p class="small mb-0">Our platform ensures secure transactions and data protection.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="d-flex mb-3">
-                            <div class="p-2 bg-success text-white rounded-circle me-3">
+                        <div class="core-value-card d-flex align-items-center">
+                            <div class="core-value-icon-wrapper">
                                 <i class="fas fa-globe"></i>
                             </div>
-                            <div>
+                            <div class="core-value-content">
                                 <h6 class="mb-1">Transparency</h6>
                                 <p class="small mb-0">We provide clear information about timber sources and pricing.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="d-flex mb-3">
-                            <div class="p-2 bg-success text-white rounded-circle me-3">
+                        <div class="core-value-card d-flex align-items-center">
+                            <div class="core-value-icon-wrapper">
                                 <i class="fas fa-handshake"></i>
                             </div>
-                            <div>
+                            <div class="core-value-content">
                                 <h6 class="mb-1">Community</h6>
                                 <p class="small mb-0">We work with local communities to ensure fair benefits.</p>
                             </div>

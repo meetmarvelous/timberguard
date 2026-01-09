@@ -14,7 +14,7 @@ if (!has_role('admin') && !has_role('forest manager')) {
 $page_title = "Transaction History";
 $breadcrumb = [
     ['title' => 'Home', 'url' => 'index.php', 'active' => false],
-    ['title' => 'Admin Dashboard', 'url' => 'index.php', 'active' => false],
+    ['title' => 'Admin Dashboard', 'url' => 'admin/index.php', 'active' => false],
     ['title' => 'Transaction History', 'url' => '', 'active' => true]
 ];
 
@@ -50,88 +50,97 @@ $transactions_by_reserve = $conn->query($sql);
 ?>
 <?php include '../includes/header.php'; ?>
 
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="display-5 fw-bold">Transaction History</h1>
-            <p class="lead">View and manage all timber transactions</p>
+<div class="container py-4 py-md-5">
+    <!-- Page Header -->
+    <div class="admin-page-header mb-4">
+        <div>
+            <h1 class="display-6 fw-bold mb-1">Transaction History</h1>
+            <p class="lead text-muted mb-0">View and manage all timber transactions</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <button type="button" class="btn btn-success btn-lg" onclick="window.print()">
-                <i class="fas fa-print me-2"></i>Print Report
-            </button>
-        </div>
+        <button type="button" class="btn btn-success btn-lg" onclick="window.print()">
+            <i class="fas fa-print me-2" aria-hidden="true"></i>Print Report
+        </button>
     </div>
     
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #4caf50, #2e7d32);">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card dashboard-stat dashboard-stat-forest h-100">
                 <div class="card-body">
-                    <i class="fas fa-receipt fa-3x mb-3"></i>
-                    <h3><?php echo $stats['completed']; ?></h3>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    </div>
+                    <h3><?php echo $stats['completed'] ?: 0; ?></h3>
                     <p>Completed</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #f44336, #b71c1c);">
+        <div class="col-6 col-md-3">
+            <div class="card dashboard-stat dashboard-stat-sold h-100">
                 <div class="card-body">
-                    <i class="fas fa-times-circle fa-3x mb-3"></i>
-                    <h3><?php echo $stats['failed']; ?></h3>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-times-circle" aria-hidden="true"></i>
+                    </div>
+                    <h3><?php echo $stats['failed'] ?: 0; ?></h3>
                     <p>Failed</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #2196f3, #0d47a1);">
+        <div class="col-6 col-md-3">
+            <div class="card dashboard-stat dashboard-stat-reports h-100">
                 <div class="card-body">
-                    <i class="fas fa-money-bill-wave fa-3x mb-3"></i>
-                    <h3><?php echo format_currency($stats['revenue']); ?></h3>
-                    <p>Total Revenue</p>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                    </div>
+                    <h3><?php echo format_currency($stats['revenue'] ?: 0); ?></h3>
+                    <p>Revenue</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card dashboard-stat h-100" style="background: linear-gradient(135deg, #8bc34a, #558b2f);">
+        <div class="col-6 col-md-3">
+            <div class="card dashboard-stat dashboard-stat-trees h-100">
                 <div class="card-body">
-                    <i class="fas fa-receipt fa-3x mb-3"></i>
-                    <h3><?php echo $stats['total']; ?></h3>
-                    <p>Total Transactions</p>
+                    <div class="dashboard-stat-icon-wrapper">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
+                    </div>
+                    <h3><?php echo $stats['total'] ?: 0; ?></h3>
+                    <p>Total</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="row">
-        <div class="col-md-8">
+    <div class="row g-4">
+        <!-- Main Content Column -->
+        <div class="col-12 col-lg-8">
             <?php if ($transactions->num_rows > 0): ?>
                 <div class="card border-0 shadow">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table class="table table-hover mb-0" id="transactionsTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Payment Code</th>
                                         <th>Customer</th>
-                                        <th>Reserve</th>
-                                        <th>Tree ID</th>
+                                        <th class="hide-mobile">Reserve</th>
+                                        <th class="hide-mobile">Tree ID</th>
                                         <th>Amount</th>
                                         <th>Status</th>
-                                        <th>Date</th>
+                                        <th class="hide-mobile">Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php while ($transaction = $transactions->fetch_assoc()): ?>
                                         <tr>
-                                            <td><?php echo $transaction['payment_code']; ?></td>
+                                            <td><code><?php echo htmlspecialchars($transaction['payment_code']); ?></code></td>
                                             <td>
-                                                <strong><?php echo $transaction['user_name']; ?></strong>
-                                                <div class="text-muted small"><?php echo $transaction['user_email']; ?></div>
+                                                <strong><?php echo htmlspecialchars($transaction['user_name']); ?></strong>
+                                                <div class="text-muted small hide-mobile"><?php echo htmlspecialchars($transaction['user_email']); ?></div>
                                             </td>
-                                            <td><?php echo $transaction['reserve_name']; ?></td>
-                                            <td><?php echo str_pad($transaction['tree_id'], 6, '0', STR_PAD_LEFT); ?></td>
-                                            <td><?php echo format_currency($transaction['amount']); ?></td>
+                                            <td class="hide-mobile"><?php echo htmlspecialchars($transaction['reserve_name']); ?></td>
+                                            <td class="hide-mobile"><code><?php echo str_pad($transaction['tree_id'], 6, '0', STR_PAD_LEFT); ?></code></td>
+                                            <td><strong class="text-success"><?php echo format_currency($transaction['amount']); ?></strong></td>
                                             <td>
                                                 <?php if ($transaction['status'] === 'completed'): ?>
                                                     <span class="badge bg-success">Completed</span>
@@ -139,11 +148,13 @@ $transactions_by_reserve = $conn->query($sql);
                                                     <span class="badge bg-danger">Failed</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?php echo date('M j, Y', strtotime($transaction['created_at'])); ?></td>
+                                            <td class="hide-mobile"><?php echo date('M j, Y', strtotime($transaction['created_at'])); ?></td>
                                             <td>
-                                                <a href="receipt.php?payment_code=<?php echo $transaction['payment_code']; ?>" 
-                                                   class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="View Receipt">
-                                                    <i class="fas fa-receipt"></i>
+                                                <a href="../payment/receipt.php?payment_code=<?php echo urlencode($transaction['payment_code']); ?>" 
+                                                   class="btn btn-sm btn-outline-success" 
+                                                   data-bs-toggle="tooltip" title="View Receipt"
+                                                   aria-label="View receipt for payment <?php echo htmlspecialchars($transaction['payment_code']); ?>">
+                                                    <i class="fas fa-receipt" aria-hidden="true"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -155,65 +166,70 @@ $transactions_by_reserve = $conn->query($sql);
                 </div>
             <?php else: ?>
                 <div class="card border-0 shadow">
-                    <div class="card-body text-center py-5">
-                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                    <div class="card-body empty-state">
+                        <i class="fas fa-receipt" aria-hidden="true"></i>
                         <h4>No transactions found</h4>
-                        <p class="text-muted">No transactions have been made yet.</p>
+                        <p>No transactions have been made yet.</p>
                     </div>
                 </div>
             <?php endif; ?>
         </div>
         
-        <div class="col-md-4">
+        <!-- Sidebar Column -->
+        <div class="col-12 col-lg-4">
+            <!-- Revenue by Reserve Card -->
             <div class="card border-0 shadow mb-4">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-success"></i>Revenue by Reserve</h5>
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-success" aria-hidden="true"></i>Revenue by Reserve</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <?php if ($transactions_by_reserve->num_rows > 0): ?>
                         <div class="list-group list-group-flush">
                             <?php while ($reserve = $transactions_by_reserve->fetch_assoc()): ?>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-4 py-3">
                                     <div>
-                                        <strong><?php echo $reserve['reserve_name']; ?></strong>
+                                        <strong><?php echo htmlspecialchars($reserve['reserve_name']); ?></strong>
                                         <div class="text-muted small">
-                                            <?php echo $reserve['completed_transactions']; ?> completed
+                                            <?php echo $reserve['completed_transactions']; ?> completed transactions
                                         </div>
                                     </div>
-                                    <span class="fw-bold"><?php echo format_currency($reserve['revenue']); ?></span>
+                                    <span class="fw-bold text-success"><?php echo format_currency($reserve['revenue']); ?></span>
                                 </div>
                             <?php endwhile; ?>
                         </div>
                     <?php else: ?>
-                        <p class="text-muted">No transaction data available.</p>
+                        <div class="p-4 text-center text-muted">
+                            <p class="mb-0">No transaction data available.</p>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
             
+            <!-- Transaction Info Card -->
             <div class="card border-0 shadow">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-success"></i>Transaction Information</h5>
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2 text-success" aria-hidden="true"></i>Transaction Information</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">This section displays all transactions made through the TimberGuard platform.</p>
+                    <p class="text-muted small mb-4">This section displays all transactions made through the TimberGuard platform.</p>
                     
-                    <h6 class="mt-4 mb-3">Key Features:</h6>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                            <div>View all completed and failed transactions</div>
+                    <h6 class="text-uppercase text-muted small mb-3">Key Features</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-start mb-3">
+                            <i class="fas fa-check-circle text-success me-3 mt-1" aria-hidden="true"></i>
+                            <span>View all completed and failed transactions</span>
                         </li>
-                        <li class="list-group-item d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                            <div>Track revenue by forest reserve</div>
+                        <li class="d-flex align-items-start mb-3">
+                            <i class="fas fa-check-circle text-success me-3 mt-1" aria-hidden="true"></i>
+                            <span>Track revenue by forest reserve</span>
                         </li>
-                        <li class="list-group-item d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                            <div>Generate printable reports for accounting purposes</div>
+                        <li class="d-flex align-items-start mb-3">
+                            <i class="fas fa-check-circle text-success me-3 mt-1" aria-hidden="true"></i>
+                            <span>Generate printable reports for accounting</span>
                         </li>
-                        <li class="list-group-item d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                            <div>View detailed transaction receipts</div>
+                        <li class="d-flex align-items-start">
+                            <i class="fas fa-check-circle text-success me-3 mt-1" aria-hidden="true"></i>
+                            <span>View detailed transaction receipts</span>
                         </li>
                     </ul>
                 </div>
@@ -222,4 +238,24 @@ $transactions_by_reserve = $conn->query($sql);
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>                        
+<?php 
+$extra_scripts = "
+<script>
+    $(document).ready(function() {
+        $('#transactionsTable').DataTable({
+            order: [[6, 'desc']],
+            pageLength: 25,
+            responsive: true,
+            columnDefs: [
+                { orderable: false, targets: [7] }
+            ],
+            language: {
+                search: '_INPUT_',
+                searchPlaceholder: 'Search transactions...'
+            }
+        });
+    });
+</script>
+";
+include '../includes/footer.php'; 
+?>

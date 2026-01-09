@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-6">
             <div class="card border-0 shadow">
                 <div class="card-header bg-success text-white text-center py-4">
-                    <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Login to Your Account</h4>
+                    <h4 class="text-white mb-0"><i class="fas fa-sign-in-alt me-2"></i>Login to Your Account</h4>
                 </div>
                 <div class="card-body p-5">
                     <form method="POST" action="login.php">

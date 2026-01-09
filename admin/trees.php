@@ -14,7 +14,7 @@ if (!has_role('admin') && !has_role('forest manager')) {
 $page_title = "Manage Trees";
 $breadcrumb = [
     ['title' => 'Home', 'url' => 'index.php', 'active' => false],
-    ['title' => 'Admin Dashboard', 'url' => 'index.php', 'active' => false],
+    ['title' => 'Admin Dashboard', 'url' => 'admin/index.php', 'active' => false],
     ['title' => 'Manage Trees', 'url' => '', 'active' => true]
 ];
 
@@ -35,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $latitude = floatval($_POST['latitude']);
         $longitude = floatval($_POST['longitude']);
         
-        // Validation
         $errors = [];
         
         if (empty($reserve_id)) {
@@ -54,9 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("isddddddds", $reserve_id, $species, $MTH, $THT, $DBH, $basal_area, $volume, $latitude, $longitude, $status);
             
             if ($stmt->execute()) {
-                // Log activity
                 log_activity($_SESSION['user_id'], 'tree_add', 'Added new tree: ' . $species . ' (ID: ' . $conn->insert_id . ')');
-                
                 $_SESSION['message'] = "Tree added successfully.";
                 $_SESSION['message_type'] = "success";
                 redirect('admin/trees.php' . ($reserve_id ? '?reserve_id=' . $reserve_id : ''));
@@ -83,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $latitude = floatval($_POST['latitude']);
         $longitude = floatval($_POST['longitude']);
         
-        // Validation
         $errors = [];
         
         if (empty($reserve_id)) {
@@ -103,9 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("isdddddddsi", $reserve_id, $species, $MTH, $THT, $DBH, $basal_area, $volume, $latitude, $longitude, $status, $id);
             
             if ($stmt->execute()) {
-                // Log activity
                 log_activity($_SESSION['user_id'], 'tree_edit', 'Edited tree: ' . $species . ' (ID: ' . $id . ')');
-                
                 $_SESSION['message'] = "Tree updated successfully.";
                 $_SESSION['message_type'] = "success";
                 redirect('admin/trees.php' . ($reserve_id ? '?reserve_id=' . $reserve_id : ''));
@@ -126,7 +120,6 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = intval($_GET['delete']);
     
     global $conn;
-    // First get tree details for logging
     $sql = "SELECT t.id, t.species, r.reserve_name 
             FROM trees t
             JOIN forest_reserves r ON t.reserve_id = r.id
@@ -139,15 +132,12 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     if ($result->num_rows > 0) {
         $tree = $result->fetch_assoc();
         
-        // Delete the tree
         $sql = "DELETE FROM trees WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $id);
         
         if ($stmt->execute()) {
-            // Log activity
             log_activity($_SESSION['user_id'], 'tree_delete', 'Deleted tree: ' . $tree['species'] . ' from ' . $tree['reserve_name'] . ' (ID: ' . $id . ')');
-            
             $_SESSION['message'] = "Tree deleted successfully.";
             $_SESSION['message_type'] = "success";
         } else {
@@ -193,36 +183,35 @@ $reserves = $conn->query($sql);
 ?>
 <?php include '../includes/header.php'; ?>
 
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="display-5 fw-bold">Tree Inventory</h1>
-            <p class="lead">Manage tree inventory across all forest reserves</p>
+<div class="container py-4 py-md-5">
+    <!-- Page Header -->
+    <div class="admin-page-header mb-4">
+        <div>
+            <h1 class="display-6 fw-bold mb-1">Tree Inventory</h1>
+            <p class="lead text-muted mb-0">Manage tree inventory across all forest reserves</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addTreeModal">
-                <i class="fas fa-plus me-2"></i>Add New Tree
-            </button>
-        </div>
+        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addTreeModal">
+            <i class="fas fa-plus me-2" aria-hidden="true"></i>Add New Tree
+        </button>
     </div>
     
     <!-- Filter by Reserve -->
     <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card border-0 shadow">
+        <div class="col-12">
+            <div class="card border-0 shadow filter-card">
                 <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h5 class="mb-0"><i class="fas fa-filter me-2 text-success"></i>Filter by Reserve</h5>
+                    <div class="row align-items-center g-3">
+                        <div class="col-12 col-md-8">
+                            <h5 class="mb-0"><i class="fas fa-filter me-2 text-success" aria-hidden="true"></i>Filter by Reserve</h5>
                         </div>
-                        <div class="col-md-4">
-                            <select class="form-select" id="reserveFilter" onchange="window.location.href='trees.php?reserve_id=' + this.value">
+                        <div class="col-12 col-md-4">
+                            <select class="form-select" id="reserveFilter" onchange="window.location.href='trees.php?reserve_id=' + this.value" aria-label="Filter trees by reserve">
                                 <option value="">All Reserves</option>
                                 <?php
                                 $reserves->data_seek(0);
                                 while ($reserve = $reserves->fetch_assoc()): ?>
                                     <option value="<?php echo $reserve['id']; ?>" <?php echo ($reserve_id == $reserve['id']) ? 'selected' : ''; ?>>
-                                        <?php echo $reserve['reserve_name']; ?>
+                                        <?php echo htmlspecialchars($reserve['reserve_name']); ?>
                                     </option>
                                 <?php endwhile; ?>
                             </select>
@@ -237,17 +226,17 @@ $reserves = $conn->query($sql);
         <div class="card border-0 shadow">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" id="treesTable">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
                                 <th>Reserve</th>
                                 <th>Species</th>
-                                <th>MHT (m)</th>
-                                <th>THT (m)</th>
-                                <th>DBH (m)</th>
+                                <th class="hide-mobile">MHT (m)</th>
+                                <th class="hide-mobile">THT (m)</th>
+                                <th class="hide-mobile">DBH (cm)</th>
                                 <th>Volume (m³)</th>
-                                <th>Coordinates</th>
+                                <th class="hide-mobile">Coordinates</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -255,14 +244,16 @@ $reserves = $conn->query($sql);
                         <tbody>
                             <?php while ($tree = $trees->fetch_assoc()): ?>
                                 <tr>
-                                    <td><?php echo str_pad($tree['id'], 6, '0', STR_PAD_LEFT); ?></td>
-                                    <td><?php echo $tree['reserve_name']; ?></td>
-                                    <td><?php echo $tree['species']; ?></td>
-                                    <td><?php echo $tree['MTH']; ?></td>
-                                    <td><?php echo $tree['THT']; ?></td>
-                                    <td><?php echo $tree['DBH']; ?></td>
+                                    <td><code><?php echo str_pad($tree['id'], 6, '0', STR_PAD_LEFT); ?></code></td>
+                                    <td><?php echo htmlspecialchars($tree['reserve_name']); ?></td>
+                                    <td><strong><?php echo htmlspecialchars($tree['species']); ?></strong></td>
+                                    <td class="hide-mobile"><?php echo $tree['MTH']; ?></td>
+                                    <td class="hide-mobile"><?php echo $tree['THT']; ?></td>
+                                    <td class="hide-mobile"><?php echo $tree['DBH']; ?></td>
                                     <td><?php echo $tree['volume']; ?></td>
-                                    <td><?php echo $tree['latitude']; ?>, <?php echo $tree['longitude']; ?></td>
+                                    <td class="hide-mobile">
+                                        <small><?php echo $tree['latitude']; ?>, <?php echo $tree['longitude']; ?></small>
+                                    </td>
                                     <td>
                                         <?php if ($tree['status'] === 'available'): ?>
                                             <span class="badge bg-success">Available</span>
@@ -271,26 +262,28 @@ $reserves = $conn->query($sql);
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex gap-1">
                                             <button type="button" class="btn btn-sm btn-outline-success" 
-                                                    data-bs-toggle="modal" data-bs-target="#editTreeModal<?php echo $tree['id']; ?>">
-                                                <i class="fas fa-edit"></i>
+                                                    data-bs-toggle="modal" data-bs-target="#editTreeModal<?php echo $tree['id']; ?>"
+                                                    aria-label="Edit tree <?php echo htmlspecialchars($tree['species']); ?>">
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
                                             </button>
                                             <a href="trees.php?delete=<?php echo $tree['id']; ?><?php echo $reserve_id ? '&reserve_id=' . $reserve_id : ''; ?>" 
                                                class="btn btn-sm btn-outline-danger" 
-                                               onclick="return confirm('Are you sure you want to delete this tree? This action cannot be undone.');">
-                                                <i class="fas fa-trash"></i>
+                                               onclick="return confirm('Are you sure you want to delete this tree? This action cannot be undone.');"
+                                               aria-label="Delete tree <?php echo htmlspecialchars($tree['species']); ?>">
+                                                <i class="fas fa-trash" aria-hidden="true"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                                 
                                 <!-- Edit Tree Modal -->
-                                <div class="modal fade" id="editTreeModal<?php echo $tree['id']; ?>" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
+                                <div class="modal fade" id="editTreeModal<?php echo $tree['id']; ?>" tabindex="-1" aria-labelledby="editTreeModalLabel<?php echo $tree['id']; ?>" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Edit Tree - <?php echo $tree['species']; ?></h5>
+                                                <h5 class="modal-title" id="editTreeModalLabel<?php echo $tree['id']; ?>">Edit Tree - <?php echo htmlspecialchars($tree['species']); ?></h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form method="POST" action="trees.php<?php echo $reserve_id ? '?reserve_id=' . $reserve_id : ''; ?>">
@@ -298,8 +291,8 @@ $reserves = $conn->query($sql);
                                                     <input type="hidden" name="edit_tree" value="1">
                                                     <input type="hidden" name="id" value="<?php echo $tree['id']; ?>">
                                                     
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
+                                                    <div class="row g-3">
+                                                        <div class="col-12 col-md-6">
                                                             <label for="reserve_id_<?php echo $tree['id']; ?>" class="form-label">Forest Reserve</label>
                                                             <select class="form-select" id="reserve_id_<?php echo $tree['id']; ?>" name="reserve_id" required>
                                                                 <option value="">Select a reserve</option>
@@ -307,66 +300,58 @@ $reserves = $conn->query($sql);
                                                                 $reserves->data_seek(0);
                                                                 while ($reserve = $reserves->fetch_assoc()): ?>
                                                                     <option value="<?php echo $reserve['id']; ?>" <?php echo ($tree['reserve_id'] == $reserve['id']) ? 'selected' : ''; ?>>
-                                                                        <?php echo $reserve['reserve_name']; ?>
+                                                                        <?php echo htmlspecialchars($reserve['reserve_name']); ?>
                                                                     </option>
                                                                 <?php endwhile; ?>
                                                             </select>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-12 col-md-6">
                                                             <label for="species_<?php echo $tree['id']; ?>" class="form-label">Species</label>
                                                             <input type="text" class="form-control" id="species_<?php echo $tree['id']; ?>" 
-                                                                   name="species" value="<?php echo $tree['species']; ?>" required>
+                                                                   name="species" value="<?php echo htmlspecialchars($tree['species']); ?>" required>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
+                                                        
+                                                        <div class="col-6 col-md-3">
                                                             <label for="MTH_<?php echo $tree['id']; ?>" class="form-label">MHT (m)</label>
                                                             <input type="number" step="0.01" class="form-control" id="MTH_<?php echo $tree['id']; ?>" 
                                                                    name="MTH" value="<?php echo $tree['MTH']; ?>" required>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-6 col-md-3">
                                                             <label for="THT_<?php echo $tree['id']; ?>" class="form-label">THT (m)</label>
                                                             <input type="number" step="0.01" class="form-control" id="THT_<?php echo $tree['id']; ?>" 
                                                                    name="THT" value="<?php echo $tree['THT']; ?>" required>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
-                                                            <label for="DBH_<?php echo $tree['id']; ?>" class="form-label">DBH (m)</label>
+                                                        <div class="col-6 col-md-3">
+                                                            <label for="DBH_<?php echo $tree['id']; ?>" class="form-label">DBH (cm)</label>
                                                             <input type="number" step="0.01" class="form-control" id="DBH_<?php echo $tree['id']; ?>" 
                                                                    name="DBH" value="<?php echo $tree['DBH']; ?>" required>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-6 col-md-3">
                                                             <label for="basal_area_<?php echo $tree['id']; ?>" class="form-label">Basal Area (m²)</label>
                                                             <input type="number" step="0.0001" class="form-control" id="basal_area_<?php echo $tree['id']; ?>" 
                                                                    name="basal_area" value="<?php echo $tree['basal_area']; ?>" required>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
+                                                        
+                                                        <div class="col-6 col-md-4">
                                                             <label for="volume_<?php echo $tree['id']; ?>" class="form-label">Volume (m³)</label>
                                                             <input type="number" step="0.0001" class="form-control" id="volume_<?php echo $tree['id']; ?>" 
                                                                    name="volume" value="<?php echo $tree['volume']; ?>" required>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-6 col-md-4">
                                                             <label for="status_<?php echo $tree['id']; ?>" class="form-label">Status</label>
                                                             <select class="form-select" id="status_<?php echo $tree['id']; ?>" name="status" required>
                                                                 <option value="available" <?php echo ($tree['status'] === 'available') ? 'selected' : ''; ?>>Available</option>
                                                                 <option value="sold" <?php echo ($tree['status'] === 'sold') ? 'selected' : ''; ?>>Sold</option>
                                                             </select>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-6">
+                                                        <div class="col-12 col-md-4"></div>
+                                                        
+                                                        <div class="col-6">
                                                             <label for="latitude_<?php echo $tree['id']; ?>" class="form-label">Latitude</label>
                                                             <input type="number" step="0.00000001" class="form-control" id="latitude_<?php echo $tree['id']; ?>" 
                                                                    name="latitude" value="<?php echo $tree['latitude']; ?>" required>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-6">
                                                             <label for="longitude_<?php echo $tree['id']; ?>" class="form-label">Longitude</label>
                                                             <input type="number" step="0.00000001" class="form-control" id="longitude_<?php echo $tree['id']; ?>" 
                                                                    name="longitude" value="<?php echo $tree['longitude']; ?>" required>
@@ -374,8 +359,8 @@ $reserves = $conn->query($sql);
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-success">Save Changes</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-2" aria-hidden="true"></i>Save Changes</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -389,18 +374,18 @@ $reserves = $conn->query($sql);
         </div>
     <?php else: ?>
         <div class="card border-0 shadow">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-tree fa-3x text-muted mb-3"></i>
+            <div class="card-body empty-state">
+                <i class="fas fa-tree" aria-hidden="true"></i>
                 <h4>No trees found</h4>
-                <p class="text-muted mb-4">
+                <p>
                     <?php if ($reserve_id): ?>
-                        No trees found in <?php echo $reserves->data_seek(0); $reserves->fetch_assoc()['reserve_name']; ?>.
+                        No trees found in this reserve.
                     <?php else: ?>
                         No trees have been added yet.
                     <?php endif; ?>
                 </p>
                 <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addTreeModal">
-                    <i class="fas fa-plus me-2"></i>Add First Tree
+                    <i class="fas fa-plus me-2" aria-hidden="true"></i>Add First Tree
                 </button>
             </div>
         </div>
@@ -408,99 +393,111 @@ $reserves = $conn->query($sql);
 </div>
 
 <!-- Add Tree Modal -->
-<div class="modal fade" id="addTreeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+<div class="modal fade" id="addTreeModal" tabindex="-1" aria-labelledby="addTreeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New Tree</h5>
+                <h5 class="modal-title" id="addTreeModalLabel">Add New Tree</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="trees.php<?php echo $reserve_id ? '?reserve_id=' . $reserve_id : ''; ?>">
                 <div class="modal-body">
                     <input type="hidden" name="add_tree" value="1">
                     
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="reserve_id" class="form-label">Forest Reserve</label>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label for="reserve_id" class="form-label">Forest Reserve <span class="text-danger">*</span></label>
                             <select class="form-select" id="reserve_id" name="reserve_id" required>
                                 <option value="">Select a reserve</option>
                                 <?php
                                 $reserves->data_seek(0);
                                 while ($reserve = $reserves->fetch_assoc()): ?>
                                     <option value="<?php echo $reserve['id']; ?>" <?php echo ($reserve_id == $reserve['id']) ? 'selected' : ''; ?>>
-                                        <?php echo $reserve['reserve_name']; ?>
+                                        <?php echo htmlspecialchars($reserve['reserve_name']); ?>
                                     </option>
                                 <?php endwhile; ?>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label for="species" class="form-label">Species</label>
+                        <div class="col-12 col-md-6">
+                            <label for="species" class="form-label">Species <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="species" name="species" 
                                    placeholder="Enter tree species" required>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        
+                        <div class="col-6 col-md-3">
                             <label for="MTH" class="form-label">MHT (m)</label>
                             <input type="number" step="0.01" class="form-control" id="MTH" name="MTH" 
-                                   placeholder="Enter MHT" required>
+                                   placeholder="0.00" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6 col-md-3">
                             <label for="THT" class="form-label">THT (m)</label>
                             <input type="number" step="0.01" class="form-control" id="THT" name="THT" 
-                                   placeholder="Enter THT" required>
+                                   placeholder="0.00" required>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="DBH" class="form-label">DBH (m)</label>
+                        <div class="col-6 col-md-3">
+                            <label for="DBH" class="form-label">DBH (cm)</label>
                             <input type="number" step="0.01" class="form-control" id="DBH" name="DBH" 
-                                   placeholder="Enter DBH" required>
+                                   placeholder="0.00" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6 col-md-3">
                             <label for="basal_area" class="form-label">Basal Area (m²)</label>
                             <input type="number" step="0.0001" class="form-control" id="basal_area" name="basal_area" 
-                                   placeholder="Enter basal area" required>
+                                   placeholder="0.0000" required>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        
+                        <div class="col-6 col-md-4">
                             <label for="volume" class="form-label">Volume (m³)</label>
                             <input type="number" step="0.0001" class="form-control" id="volume" name="volume" 
-                                   placeholder="Enter volume" required>
+                                   placeholder="0.0000" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6 col-md-4">
                             <label for="status" class="form-label">Status</label>
                             <select class="form-select" id="status" name="status" required>
-                                <option value="available">Available</option>
+                                <option value="available" selected>Available</option>
                                 <option value="sold">Sold</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-4"></div>
+                        
+                        <div class="col-6">
                             <label for="latitude" class="form-label">Latitude</label>
                             <input type="number" step="0.00000001" class="form-control" id="latitude" name="latitude" 
-                                   placeholder="Enter latitude" required>
+                                   placeholder="0.00000000" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6">
                             <label for="longitude" class="form-label">Longitude</label>
                             <input type="number" step="0.00000001" class="form-control" id="longitude" name="longitude" 
-                                   placeholder="Enter longitude" required>
+                                   placeholder="0.00000000" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Add Tree</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-plus me-2" aria-hidden="true"></i>Add Tree</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php 
+$extra_scripts = "
+<script>
+    $(document).ready(function() {
+        $('#treesTable').DataTable({
+            order: [[0, 'desc']],
+            pageLength: 25,
+            responsive: true,
+            columnDefs: [
+                { orderable: false, targets: [7, 9] }
+            ],
+            language: {
+                search: '_INPUT_',
+                searchPlaceholder: 'Search trees...'
+            }
+        });
+    });
+</script>
+";
+include '../includes/footer.php'; 
+?>

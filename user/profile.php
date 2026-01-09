@@ -151,7 +151,7 @@ $user = $stmt->get_result()->fetch_assoc();
         <div class="col-md-8">
             <div class="card border-0 shadow">
                 <div class="card-header bg-success text-white py-4">
-                    <h4 class="mb-0"><i class="fas fa-user me-2"></i>My Profile</h4>
+                    <h4 class="mb-0 text-white"><i class="fas fa-user me-2"></i>My Profile</h4>
                 </div>
                 <div class="card-body p-5">
                     <form method="POST" action="profile.php">

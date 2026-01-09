@@ -62,24 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Fade in animation for elements
-    const fadeElements = document.querySelectorAll('.fade-in');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = 1;
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.1 });
-    
-    fadeElements.forEach(element => {
-        element.style.opacity = 0;
-        element.style.transform = 'translateY(20px)';
-        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(element);
-    });
-    
     // Handle print functionality
     const printButtons = document.querySelectorAll('.btn-print');
     printButtons.forEach(button => {
@@ -105,15 +87,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
     
-    // Handle modal events
+    // Handle modal events with proper timing
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         modal.addEventListener('shown.bs.modal', function() {
-            // Focus first input in modal
-            const firstInput = this.querySelector('input, textarea, select');
-            if (firstInput) {
-                firstInput.focus();
-            }
+            // Focus first input in modal after it's fully shown
+            setTimeout(() => {
+                const firstInput = this.querySelector('input, textarea, select');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }, 100);
+        });
+        
+        modal.addEventListener('show.bs.modal', function() {
+            // Prevent multiple modals from opening simultaneously
+            document.querySelectorAll('.modal.show').forEach(otherModal => {
+                if (otherModal !== this) {
+                    const bsModal = bootstrap.Modal.getInstance(otherModal);
+                    if (bsModal) {
+                        bsModal.hide();
+                    }
+                }
+            });
         });
     });
     
@@ -186,10 +182,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-  });
-  
-  // Utility functions
-  function showNotification(message, type = 'success') {
+    
+    // Fix for modal blinking issue - prevent multiple event bindings
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        if (target.matches('[data-bs-toggle="modal"]')) {
+            // Prevent default behavior if needed
+            e.preventDefault();
+            
+            // Get modal target
+            const modalTarget = target.getAttribute('data-bs-target') || target.getAttribute('href');
+            if (modalTarget) {
+                const modal = document.querySelector(modalTarget);
+                if (modal) {
+                    // Check if modal is already open
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.show();
+                    } else {
+                        new bootstrap.Modal(modal).show();
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Utility functions
+function showNotification(message, type = 'success') {
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
@@ -207,57 +227,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const bsAlert = new bootstrap.Alert(notification);
         bsAlert.close();
     }, 5000);
-  }
-  
-  function confirmAction(message, callback) {
+}
+
+function confirmAction(message, callback) {
     if (confirm(message)) {
         callback();
     }
-  }
-  
-  // Global error handler
-  window.addEventListener('error', function(e) {
+}
+
+// Global error handler
+window.addEventListener('error', function(e) {
     console.error('Error:', e.error);
     // In production, you might want to send this to an error tracking service
-  });
+});
 
-
-
-
-// MODAL FIXES - Add these at the end of your main.js file
+// Prevent multiple form submissions
 document.addEventListener('DOMContentLoaded', function() {
-    // Fix for double scrollbar issue
-    const modalEls = document.querySelectorAll('.modal');
-    modalEls.forEach(modal => {
-        modal.addEventListener('show.bs.modal', function() {
-            // Remove Bootstrap's body padding that causes layout shift
-            document.body.style.paddingRight = '0';
-            document.body.classList.remove('modal-open');
-        });
-        
-        modal.addEventListener('hidden.bs.modal', function() {
-            // Ensure body scrolling is restored properly
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '0';
-            document.body.classList.remove('modal-open');
-        });
-    });
-    
-    // Fix for form submission in modals
-    const modalForms = document.querySelectorAll('.modal form');
-    modalForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            // Prevent default form submission for AJAX handling if needed
-            // e.preventDefault();
-            
-            // Optional: Add loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            // Disable submit button to prevent multiple submissions
+            const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
-                const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating...';
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
                 
-                // Reset button after 3 seconds if needed
+                // Re-enable after 3 seconds if still disabled
                 setTimeout(() => {
                     if (submitBtn.disabled) {
                         submitBtn.disabled = false;
@@ -265,31 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }, 3000);
             }
-        });
-    });
-    
-    // Fix for modals not closing properly
-    const modalCloseButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
-    modalCloseButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const modal = this.closest('.modal');
-            if (modal) {
-                const modalInstance = bootstrap.Modal.getInstance(modal);
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
-            }
-        });
-    });
-    
-    // Initialize all tooltips inside modals when they're shown
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.addEventListener('shown.bs.modal', function() {
-            const tooltipTriggerList = [].slice.call(this.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
         });
     });
 });

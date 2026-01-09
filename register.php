@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-8">
             <div class="card border-0 shadow">
                 <div class="card-header bg-success text-white text-center py-4">
-                    <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Create Your Account</h4>
+                    <h4 class="text-white mb-0"><i class="fas fa-user-plus me-2"></i>Create Your Account</h4>
                 </div>
                 <div class="card-body p-5">
                     <form method="POST" action="register.php">

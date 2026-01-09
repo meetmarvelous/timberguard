@@ -1,0 +1,19 @@
+# Force all text files to use LF and never change them
+* text=auto eol=lf
+
+# Except for Windows batch files which MUST have CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Explicitly mark binaries (optional but safe)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
